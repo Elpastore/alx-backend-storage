@@ -31,7 +31,7 @@ if __name__ == "__main__":
     main program
     """
     # Connect to MongoDB
-    client = pymongo.MongoClient('mongodb://localhost:27017/')
+    client = pymongo.MongoClient('mongodb://127.0.0.1:27017/')
     db = client['logs']
     collection = db['nginx']
 
