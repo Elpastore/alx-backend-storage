@@ -37,6 +37,3 @@ if __name__ == "__main__":
 
     # Call the logs_stats function
     logs_stats(collection)
-
-    # Close the MongoDB connection
-    client.close()
