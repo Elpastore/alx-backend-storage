@@ -13,7 +13,7 @@ def nginx_logs_stats(collection):
     Provides some stats about Nginx logs stored in MongoDB
     """
     # Total number of log entries
-    total_logs = collection.count_documents()
+    total_logs = collection.estimated_document_count()
     print(f"{total_logs} logs")
 
     # Number of documents with each HTTP method
