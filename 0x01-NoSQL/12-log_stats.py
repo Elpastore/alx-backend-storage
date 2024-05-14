@@ -25,6 +25,9 @@ def logs_stats(collection):
 
 
 if __name__ == "__main__":
+    """
+    main program
+    """
     # Connect to MongoDB
     client = pymongo.MongoClient('mongodb://localhost:27017/')
     db = client.logs
