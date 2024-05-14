@@ -30,8 +30,8 @@ if __name__ == "__main__":
     """
     # Connect to MongoDB
     client = pymongo.MongoClient('mongodb://localhost:27017/')
-    db = client.logs
-    collection = db.nginx
+    db = client['logs']
+    collection = db['nginx']
 
     # Call the logs_stats function
     logs_stats(collection)
