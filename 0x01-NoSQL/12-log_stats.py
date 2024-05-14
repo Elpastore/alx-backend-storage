@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import pymongo
-
+"""
+12-log_stats module
+"""
 
 def logs_stats(collection):
     """
