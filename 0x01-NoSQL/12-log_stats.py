@@ -4,26 +4,19 @@ import pymongo
 12-log_stats module
 """
 
-def logs_stats(collection):
-    """
-    Provides some stats about Nginx logs stored in MongoDB.
-    """
-    # Calculate total number of log entries
-    logs = collection.count_documents({})
-    print(f"{logs} logs")
 
-    # List of HTTP methods to count
-    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+def log_nginx_stats(mongo_collection):
+    """provides some stats about Nginx logs"""
+    print(f"{mongo_collection.estimated_document_count()} logs")
+
     print("Methods:")
-    for method in methods:
-        # Count documents with each HTTP method
-        count = collection.count_documents({"method": method})
+    for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
+        count = mongo_collection.count_documents({"method": method})
         print(f"\tmethod {method}: {count}")
 
-    # Count documents with method=GET and path=/status
-    status_count = collection.count_documents({"method": "GET",
-                                               "path": "/status"})
-    print(f"{status_count} status check")
+    number_of_gets = mongo_collection.count_documents(
+        {"method": "GET", "path": "/status"})
+    print(f"{number_of_gets} status check")
 
 
 if __name__ == "__main__":
@@ -36,4 +29,4 @@ if __name__ == "__main__":
     collection = db['nginx']
 
     # Call the logs_stats function
-    logs_stats(collection)
+    log_nginx_stats(collection)
