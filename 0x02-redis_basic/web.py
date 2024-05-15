@@ -1,49 +1,23 @@
 #!/usr/bin/env python3
-"""
-web module
-"""
+'''A module with tools for request caching and tracking.
+'''
 import redis
 import requests
 from datetime import timedelta
-from functools import wraps
-from typing import Callable
-
-r = redis.Redis()
 
 
-def count_decorator(method: Callable) -> Callable:
-    """
-    count_decorator decorator and returns a Callable
-    """
-    def wrapper(url: str) -> str:
-        """
-        wrapper function
-        """
-        key = f'cached:{url}'
-        data = r.get(key)
-        if data:
-            return data.decode(key)
-
-        count = f'count:{url}'
-        page = method(url)
-
-        r.incr(count)
-        r.set(key, page)
-        r.expire(key, 10)
-
-        return page
-    return wrapper
-
-
-@count_decorator
 def get_page(url: str) -> str:
     """
-    It uses the requests module to obtain the HTML
-    content of a particular URL and returns it.
+    It uses the requests module to obtain
+    the HTML content of a particular URL and returns it.
+    Args:
+        url (str): url whose content is to be fectched
+    Returns:
+        html (str): the HTML content of the url
     """
-    request = requests.get(url)
-    return request.text
-
-
-if __name__ == '__main__':
-    get_page('http://slowwly.robertomurray.co.uk')
+    r = redis.Redis()
+    key = "count:{}{}{}".format('{', url, '}')
+    r.incr(key)
+    res = requests.get(url)
+    r.setex(url, timedelta(seconds=10), res.text)
+    return res.text
