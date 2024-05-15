@@ -41,7 +41,7 @@ class Cache():
         """
         return self.get(key, lambda x: x.decode('utf-8'))
 
-    def get_string(self, key: str) -> str:
+    def get_int(self, key: str) -> int:
         """
         conversion function to int
         """
