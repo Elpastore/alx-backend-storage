@@ -42,29 +42,36 @@ def call_history(method: Callable) -> Callable:
 
 
 def replay(fn: Callable):
-    """
-    Display the history of calls of a particular function
-    """
+    """display the history of calls of a particular function"""
     r = redis.Redis()
     function_name = fn.__qualname__
-    
-    # Retrieve the number of times the function was called
     value = r.get(function_name)
-    num_calls = int(value.decode("utf-8")) if value else 0
+    try:
+        value = int(value.decode("utf-8"))
+    except Exception:
+        value = 0
 
-    print(f"{function_name} was called {num_calls} times:")
-    
-    # Retrieve input and output histories from Redis
-    inputs = r.lrange(f"{function_name}:inputs", 0, -1)
-    outputs = r.lrange(f"{function_name}:outputs", 0, -1)
+    # print(f"{function_name} was called {value} times")
+    print("{} was called {} times:".format(function_name, value))
+    # inputs = r.lrange(f"{function_name}:inputs", 0, -1)
+    inputs = r.lrange("{}:inputs".format(function_name), 0, -1)
 
-    for input_args, output in zip(inputs, outputs):
-        # Decode inputs and outputs if they are bytes
-        input_args_str = input_args.decode("utf-8") if isinstance(input_args, bytes) else input_args
-        output_str = output.decode("utf-8") if isinstance(output, bytes) else output
+    # outputs = r.lrange(f"{function_name}:outputs", 0, -1)
+    outputs = r.lrange("{}:outputs".format(function_name), 0, -1)
 
-        # Print the function call along with input and output
-        print(f"{function_name}(*{input_args_str}) -> {output_str}")
+    for input, output in zip(inputs, outputs):
+        try:
+            input = input.decode("utf-8")
+        except Exception:
+            input = ""
+
+        try:
+            output = output.decode("utf-8")
+        except Exception:
+            output = ""
+
+        # print(f"{function_name}(*{input}) -> {output}")
+        print("{}(*{}) -> {}".format(function_name, input, output))
 
 
 class Cache():
