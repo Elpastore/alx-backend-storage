@@ -55,7 +55,8 @@ def replay(method: Callable):
     output_history = cache.lrange(outputs_key, 0, -1)
 
     # Display the history
-    print(f"{method_name} was called {len(input_history)} times:")
+    # print(f"{method_name} was called {len(input_history)} times:")
+    print(f"{method_name} was called {int(cache.get(method_name))} times:")
     for input_args, output in zip(input_history, output_history):
         input_args_str = input_args.decode("utf-8") \
             if isinstance(input_args, bytes) else input_args
