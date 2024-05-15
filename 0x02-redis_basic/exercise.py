@@ -39,12 +39,10 @@ class Cache():
         """
         conversion function to string
         """
-        value = self.get(key, lambda x: x.decode('utf-8'))
-        return str(value)
+        return self.get(key, lambda x: x.decode('utf-8'))
 
     def get_int(self, key: str) -> int:
         """
         conversion function to int
         """
-        value = self.get(key, lambda x: int(x))
-        return int(value)
+        return self.get(key, lambda x: int(x))
