@@ -1,23 +1,32 @@
 #!/usr/bin/env python3
 '''A module with tools for request caching and tracking.
 '''
-import redis
-import requests
-from datetime import timedelta
 
+import requests
+import redis
+import time
 
 def get_page(url: str) -> str:
-    """
-    It uses the requests module to obtain
-    the HTML content of a particular URL and returns it.
-    Args:
-        url (str): url whose content is to be fectched
-    Returns:
-        html (str): the HTML content of the url
-    """
+    # Initialize Redis connection
     r = redis.Redis()
-    key = "count:{}{}{}".format('{', url, '}')
-    r.incr(key)
-    res = requests.get(url)
-    r.setex(url, timedelta(seconds=10), res.text)
-    return res.text
+
+    # Increment access count for the URL
+    url_count_key = f"count:{url}"
+    r.incr(url_count_key)
+
+    # Check if the cached content exists
+    cached_content = r.get(url)
+    if cached_content:
+        return cached_content.decode("utf-8")
+
+    # Fetch the HTML content from the URL
+    response = requests.get(url)
+    if response.status_code == 200:
+        html_content = response.text
+
+        # Cache the HTML content with a timeout of 10 seconds
+        r.setex(url, 10, html_content)
+
+        return html_content
+    else:
+        return f"Failed to fetch page: {url}"
