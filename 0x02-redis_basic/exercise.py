@@ -20,13 +20,14 @@ def count_calls(method: Callable) -> Callable:
 
     return wrapper
 
+
 def call_history(method: Callable) -> Callable:
     """
     call_history decorator and return a Callable
     """
     inputs_key = method.__qualname__ + ":inputs"
     outputs_key = method.__qualname__ + ":outputs"
-    
+
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         """
@@ -36,8 +37,9 @@ def call_history(method: Callable) -> Callable:
         outputs = method(self, *args, **kwargs)
         self._redis.rpush(outputs_key, str(outputs))
         return outputs
-    
+
     return wrapper
+
 
 def replay(method: Callable):
     """
@@ -47,17 +49,20 @@ def replay(method: Callable):
     inputs_key = method_name + ":inputs"
     outputs_key = method_name + ":outputs"
     cache = redis.Redis()
-    
+
     # Retrieve history from redis
     input_history = cache.lrange(inputs_key, 0, -1)
     output_history = cache.lrange(outputs_key, 0, -1)
-    
+
     # Display the history
     print(f"{method_name} was called {len(input_history)} times:")
     for input_args, output in zip(input_history, output_history):
-        input_args_str = input_args.decode("utf-8") if isinstance(input_args, bytes) else input_args
-        output_str = output.decode("utf-8") if isinstance(output, bytes) else output
+        input_args_str = input_args.decode("utf-8") \
+            if isinstance(input_args, bytes) else input_args
+        output_str = output.decode("utf-8") \
+            if isinstance(output, bytes) else output
         print(f"{method_name}(*{input_args_str}) -> {output_str}")
+
 
 class Cache():
     """
@@ -80,7 +85,10 @@ class Cache():
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float, None]:
+    def get(self,
+            key: str,
+            fn: Optional[Callable] = None) -> Union[str,
+                                                    bytes, int, float, None]:
         """
         convert the data back to the desired format
         """
@@ -97,6 +105,6 @@ class Cache():
 
     def get_int(self, key: str) -> Union[int, None]:
         """
-        conversion function to if 
+        conversion function to if
         """
         return self.get(key, lambda x: int(x) if isinstance(x, bytes) else x)
