@@ -39,6 +39,25 @@ def call_history(method: Callable) -> Callable:
     
     return wrapper
 
+def replay(method: Callable):
+    """
+    display the history of a function
+    """
+    method_name = method.__qualname__
+    inputs_key = method_name + ":inputs"
+    outputs_key = method_name + ":outputs"
+    cache = redis.Redis()
+    
+    # Retrieve history from redis
+    input_history = cache.lrange(inputs_key, 0, -1)
+    output_history = cache.lrange(outputs_key, 0, -1)
+    
+    # Display the history
+    print(f"{method_name} was called {len(input_history)} times:")
+    for input_args, output in zip(input_history, output_history):
+        input_args_str = input_args.decode("utf-8") if isinstance(input_args, bytes) else input_args
+        output_str = output.decode("utf-8") if isinstance(output, bytes) else output
+        print(f"{method_name}(*{input_args_str}) -> {output_str}")
 
 class Cache():
     """
