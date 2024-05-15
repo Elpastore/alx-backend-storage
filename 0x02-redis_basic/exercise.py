@@ -26,23 +26,14 @@ class Cache():
         self._redis.set(key, data)
         return key
 
-    def get(self,
-            key: str,
-            fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
-        """
-        convert the data back to the desired format
-        """
+    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float, None]:
         value = self._redis.get(key)
+        if value is None:
+            return None
         return fn(value) if fn is not None else value
 
-    def get_string(self, key: str) -> str:
-        """
-        conversion function to string
-        """
-        return self.get(key, lambda x: x.decode('utf-8'))
+    def get_str(self, key: str) -> Union[str, None]:
+        return self.get(key, lambda x: x.decode('utf-8') if isinstance(x, bytes) else x)
 
-    def get_int(self, key: str) -> int:
-        """
-        conversion function to int
-        """
-        return self.get(key, lambda x: int(x))
+    def get_int(self, key: str) -> Union[int, None]:
+        return self.get(key, lambda x: int(x) if isinstance(x, bytes) else x)
