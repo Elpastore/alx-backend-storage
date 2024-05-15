@@ -35,14 +35,16 @@ class Cache():
         value = self._redis.get(key)
         return fn(value) if fn is not None else value
 
-    def get_string(self, key: str) -> Union[str, bytes, int, float]:
+    def get_string(self, key: str) -> str:
         """
         conversion function to string
         """
-        return self.get(key, lambda x: x.decode('utf-8'))
+        value = self.get(key, lambda x: x.decode('utf-8'))
+        return str(value)
 
-    def get_int(self, key: str) -> Union[str, bytes, int, float]:
+    def get_int(self, key: str) -> int:
         """
         conversion function to int
         """
-        return self.get(key, lambda x: int(x))
+        value = self.get(key, lambda x: int(x))
+        return int(value)
