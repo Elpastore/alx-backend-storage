@@ -41,37 +41,28 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
-def replay(fn: Callable):
-    """display the history of calls of a particular function"""
-    r = redis.Redis()
-    function_name = fn.__qualname__
-    value = r.get(function_name)
-    try:
-        value = int(value.decode("utf-8"))
-    except Exception:
-        value = 0
+def replay(method: Callable):
+    """
+    display the history of a function
+    """
+    method_name = method.__qualname__
+    inputs_key = method_name + ":inputs"
+    outputs_key = method_name + ":outputs"
+    cache = redis.Redis()
 
-    # print(f"{function_name} was called {value} times")
-    print("{} was called {} times:".format(function_name, value))
-    # inputs = r.lrange(f"{function_name}:inputs", 0, -1)
-    inputs = r.lrange("{}:inputs".format(function_name), 0, -1)
+    # Retrieve history from redis
+    input_history = cache.lrange(inputs_key, 0, -1)
+    output_history = cache.lrange(outputs_key, 0, -1)
 
-    # outputs = r.lrange(f"{function_name}:outputs", 0, -1)
-    outputs = r.lrange("{}:outputs".format(function_name), 0, -1)
-
-    for input, output in zip(inputs, outputs):
-        try:
-            input = input.decode("utf-8")
-        except Exception:
-            input = ""
-
-        try:
-            output = output.decode("utf-8")
-        except Exception:
-            output = ""
-
-        # print(f"{function_name}(*{input}) -> {output}")
-        print("{}(*{}) -> {}".format(function_name, input, output))
+    # Display the history
+    # print(f"{method_name} was called {len(input_history)} times:")
+    print(f"{method_name} was called {int(cache.get(method_name))} times:")
+    for input_args, output in zip(input_history, output_history):
+        input_args_str = input_args.decode("utf-8") \
+            if isinstance(input_args, bytes) else input_args
+        output_str = output.decode("utf-8") \
+            if isinstance(output, bytes) else output
+        print(f"{method_name}(*{input_args_str}) -> {output_str}")
 
 
 class Cache():
