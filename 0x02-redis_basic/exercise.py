@@ -41,28 +41,30 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
-def replay(method: Callable):
+def replay(fn: Callable):
     """
-    display the history of a function
+    Display the history of calls of a particular function
     """
-    method_name = method.__qualname__
-    inputs_key = method_name + ":inputs"
-    outputs_key = method_name + ":outputs"
-    cache = redis.Redis()
+    r = redis.Redis()
+    function_name = fn.__qualname__
+    
+    # Retrieve the number of times the function was called
+    value = r.get(function_name)
+    num_calls = int(value.decode("utf-8")) if value else 0
 
-    # Retrieve history from redis
-    input_history = cache.lrange(inputs_key, 0, -1)
-    output_history = cache.lrange(outputs_key, 0, -1)
+    print(f"{function_name} was called {num_calls} times:")
+    
+    # Retrieve input and output histories from Redis
+    inputs = r.lrange(f"{function_name}:inputs", 0, -1)
+    outputs = r.lrange(f"{function_name}:outputs", 0, -1)
 
-    # Display the history
-    # print(f"{method_name} was called {len(input_history)} times:")
-    print(f"{method_name} was called {int(cache.get(method_name))} times:")
-    for input_args, output in zip(input_history, output_history):
-        input_args_str = input_args.decode("utf-8") \
-            if isinstance(input_args, bytes) else input_args
-        output_str = output.decode("utf-8") \
-            if isinstance(output, bytes) else output
-        print(f"{method_name}(*{input_args_str}) -> {output_str}")
+    for input_args, output in zip(inputs, outputs):
+        # Decode inputs and outputs if they are bytes
+        input_args_str = input_args.decode("utf-8") if isinstance(input_args, bytes) else input_args
+        output_str = output.decode("utf-8") if isinstance(output, bytes) else output
+
+        # Print the function call along with input and output
+        print(f"{function_name}(*{input_args_str}) -> {output_str}")
 
 
 class Cache():
