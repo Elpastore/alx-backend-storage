@@ -27,13 +27,22 @@ class Cache():
         return key
 
     def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float, None]:
+        """
+        convert the data back to the desired format
+        """
         value = self._redis.get(key)
         if value is None:
             return None
         return fn(value) if fn is not None else value
 
     def get_str(self, key: str) -> Union[str, None]:
+        """
+        conversion function to str
+        """
         return self.get(key, lambda x: x.decode('utf-8') if isinstance(x, bytes) else x)
 
     def get_int(self, key: str) -> Union[int, None]:
+        """
+        conversion function to if 
+        """
         return self.get(key, lambda x: int(x) if isinstance(x, bytes) else x)
